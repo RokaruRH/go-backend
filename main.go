@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("https://www.youtube.com")
+	resp, err := http.Get("https://www.Google.com")
 	if err != nil {
 		fmt.Println("ошыбка при отправке Http запроса", err)
 		return
