@@ -1,4 +1,4 @@
-module telegram_bot
+module url-shortener
 
 go 1.24.2
 
