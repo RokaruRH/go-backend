@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"url-shortener/internal/config"
+	"url-shortener/internal/storage/sqlite"
 )
 
 const (
@@ -15,11 +16,15 @@ const (
 func main() {
 	config := config.MustLoad()
 
-	logger := setuplogger(config.Env)
+	log := setuplogger(config.Env)
 
-	logger.Info("My server is started!!!!")
+	log.Info("My server is started!!!!")
 
-	//TODO init storage: sqlite
+	storage, err := sqlite.New(config.StoragePath)
+	if err != nil {
+		log.Error("Failed to init storage")
+		os.Exit(1)
+	}
 
 	//TODO init router: chi "chi reader"
 
