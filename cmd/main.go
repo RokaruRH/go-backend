@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"url-shortener/internal/config"
+	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage/sqlite"
 )
 
@@ -20,9 +21,9 @@ func main() {
 
 	log.Info("My server is started!!!!")
 
-	storage, err := sqlite.New(config.StoragePath)
+	_, err := sqlite.New(config.StoragePath)
 	if err != nil {
-		log.Error("Failed to init storage")
+		log.Error("failed to init storage", sl.Err(err))
 		os.Exit(1)
 	}
 
