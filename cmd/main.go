@@ -28,7 +28,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(storage.GetURL("g"))
+	fmt.Println(storage.DeleteURL("g"))
 
 	//TODO init router: chi "chi reader"
 

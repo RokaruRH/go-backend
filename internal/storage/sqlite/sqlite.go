@@ -79,3 +79,23 @@ func (s Storage) GetURL(alias string) (string, error) {
 
 	return fetchedURL, nil
 }
+func (s Storage) DeleteURL(alias string) error {
+	const operation = "storage.sqlite.DeleteURL"
+	stmt, err := s.db.Prepare("DELETE FROM url WHERE alias = ?")
+	if err != nil {
+		return fmt.Errorf("%s: prepare statement: %w", operation, err)
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(alias)
+	if err != nil {
+		return fmt.Errorf("%s: execute statement: %w", operation, err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s: failed to get rows affected: %w", operation, err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: %w", operation, storage.ErrURLNotFound)
+	}
+	return nil
+}
