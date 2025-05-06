@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"url-shortener/internal/config"
@@ -21,11 +22,13 @@ func main() {
 
 	log.Info("My server is started!!!!")
 
-	_, err := sqlite.New(config.StoragePath)
+	storage, err := sqlite.New(config.StoragePath)
 	if err != nil {
 		log.Error("failed to init storage", sl.Err(err))
 		os.Exit(1)
 	}
+
+	fmt.Println(storage.GetURL("g"))
 
 	//TODO init router: chi "chi reader"
 
