@@ -3,9 +3,9 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
+	"url-shortener/internal/storage"
 
 	"github.com/mattn/go-sqlite3"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Storage struct {
@@ -16,18 +16,18 @@ func New(storagePath string) (*Storage, error) {
 	const op = "storage.sqlite.New"
 	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
-		return nil, fmt.Errorf(" %s: %w ", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	stmt, err := db.Prepare(`
 		CREATE TABLE IF NOT EXISTS url(
-			id INTEGER PRINMARY KEY,
+			id INTEGER PRIMARY KEY,
 			alias TEXT NOT NULL UNIQUE,
 			url TEXT NOT NULL);
 		CREATE INDEX IF NOT EXISTS idx_alias ON url(alias);
 			`)
 	if err != nil {
-		return nil, fmt.Errorf("#{op}: #{err}")
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	_, err = stmt.Exec()
@@ -40,16 +40,20 @@ func New(storagePath string) (*Storage, error) {
 }
 func (s Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	const op = "storage.sqlite.SaveURL"
-	stmt, err := s.db.Prepare("INSERT	INTO url(url, alias) VALUES (?,?)")
+	stmt, err := s.db.Prepare("INSERT INTO url(url, alias) Values(?, ?)")
 	if err != nil {
-		return 0, fmt.Errorf("%s, %w", op, err)
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 	res, err := stmt.Exec(urlToSave, alias)
 	if err != nil {
-		if sqlitErr, ok := err.(sqlite.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-			return 0, fmt.Errorf("#{op}: #{storage.ErrURLExists}")
+		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			return 0, fmt.Errorf("%s: %w", op, storage.ErrURLExists)
 		}
-	if err != nil {
-		return 0, fmt.Errorf("%s, %w", op, err)
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("%s: failed to get last id: %w", op, err)
+	}
+	return id, nil
 }
