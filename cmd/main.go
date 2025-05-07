@@ -1,12 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"url-shortener/internal/config"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage/sqlite"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 const (
@@ -27,9 +29,9 @@ func main() {
 		log.Error("failed to init storage", sl.Err(err))
 		os.Exit(1)
 	}
-
-	fmt.Println(storage.DeleteURL("g"))
-
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Logger)
 	//TODO init router: chi "chi reader"
 
 	//TODO init run server
