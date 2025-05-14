@@ -21,6 +21,8 @@ type Response struct {
 	Alias string `json: "alias,omitempty"`
 }
 
+const aliasLength = 6
+
 type URLSaver interface {
 	SaveURL(urtToSave string, alias string) (int64, error)
 }
@@ -48,11 +50,17 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 		if err := validator.New().Struct(req); err != nil {
 
+			validateErr := err.(validator.ValidationErrors)
+
 			log.Error("invalid requrest", sl.Err(err))
 
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.ValidationError(validateErr))
 
 			return
+		}
+		alias := req.Alias
+		if alias == "" {
+			alias = random.NewRandomString(aliasLength)
 		}
 	}
 }
