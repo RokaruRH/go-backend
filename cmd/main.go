@@ -5,7 +5,7 @@ import (
 	"os"
 	"url-shortener/internal/config"
 	mwLogger "url-shortener/internal/http-server/middleware/logger"
-	"url-shortener/internal/lib/logger/handler/slogpretty"
+	"url-shortener/internal/lib/logger/handlers/slogpretty"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage/sqlite"
 
@@ -45,30 +45,30 @@ func setuplogger(environment string) *slog.Logger {
 	var log *slog.Logger
 
 	switch environment {
-		case envLocal:
-			log = setupPrettySlog()
-		case envDev:
-			log = slog.New(
-				slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-			)
-		case envProduction:
-			log = slog.New(
-				slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
-			)
-		default: // If env config is invalid, set prod settings by default due to security
-			log = slog.New(
-				slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
-			)
-		}
+	case envLocal:
+		log = setupPrettySlog()
+	case envDev:
+		log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+		)
+	case envProduction:
+		log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+	default: // If env config is invalid, set prod settings by default due to security
+		log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+	}
 
-		return log
+	return log
 }
-func setupPrettySlog() *slog.Logger{
+func setupPrettySlog() *slog.Logger {
 	opts := slogpretty.PrettyHandlerOptions{
 		SlogOpts: &slog.HandlerOptions{
 			Level: slog.LevelDebug,
-	 },
+		},
 	}
 	handler := opts.NewPrettyHandler(os.Stdout)
- return slog.New(handler)
+	return slog.New(handler)
 }
