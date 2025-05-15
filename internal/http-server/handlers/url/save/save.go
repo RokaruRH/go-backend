@@ -7,10 +7,11 @@ import (
 	resp "url-shortener/internal/lib/api/response"
 	"url-shortener/internal/lib/logger/sl"
 
+	"log/slog"
+
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
-	"golang.org/x/exp/slog"
 )
 
 // initialize a single validator instance
