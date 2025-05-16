@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
 	"url-shortener/internal/config"
 	"url-shortener/internal/http-server/handlers/url/save"
@@ -41,7 +42,19 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Post("/alias", save.New(log, storage))
-	//TODO init run server
+	log.Info("starting server", slog.String("address", config.Address))
+
+	srv := &http.Server{
+		Addr:         config.Address,
+		Handler:      router,
+		ReadTimeout:  config.HTTPServer.Timeout,
+		WriteTimeout: config.HTTPServer.Timeout,
+		IdleTimeout:  config.HTTPServer.IdleTimeout,
+	}
+	if err := srv.ListenAndServe(); err != nil {
+		log.Error("failed to start server")
+	}
+	log.Error("server stoped")
 }
 
 func setuplogger(environment string) *slog.Logger {
