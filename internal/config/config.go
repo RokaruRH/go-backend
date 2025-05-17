@@ -16,7 +16,9 @@ type Config struct {
 type HTTPServer struct {
 	Address     string        `yaml:"address" env-required:"true"`
 	Timeout     time.Duration `yaml:"timeout" env-required:"true"`
-	IdleTimeout time.Duration `yaml:"idle_timeout" env-required:"true"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
+	User        string        `yaml: "user"     env-required:"true" `
+	Password    string        `yaml: "password" env-required:"true" env: "HTTP_SERVER_PASSWORD"`
 }
 
 const CONFIG_PATH = "config/local.yaml"
