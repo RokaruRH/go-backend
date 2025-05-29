@@ -1,0 +1,11 @@
+name: check
+on:
+jobs:
+  runs-on: arch\-latest
+  steps:
+  name: Checkout
+  uses: actions/checkout@v3
+  2name: Install deps
+  run: npm ci
+  3name: Lint
+  2run: npm run lint

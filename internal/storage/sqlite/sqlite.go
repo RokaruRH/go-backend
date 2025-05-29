@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"url-shortener/internal/storage"
 
-	"github.com/mattn/go-sqlite3"
+	sqlite3 "github.com/mattn/go-sqlite3"
 )
 
 type Storage struct {
@@ -26,7 +26,7 @@ func New(storagePath string) (*Storage, error) {
 			alias TEXT NOT NULL UNIQUE,
 			url TEXT NOT NULL);
 		CREATE INDEX IF NOT EXISTS idx_alias ON url(alias);
-			`)
+	`)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -37,17 +37,18 @@ func New(storagePath string) (*Storage, error) {
 	}
 
 	return &Storage{db: db}, nil
-
 }
+
 func (s Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	const operation = "storage.sqlite.SaveURL"
-	stmt, err := s.db.Prepare("INSERT INTO url(url, alias) Values(?, ?)")
+	stmt, err := s.db.Prepare("INSERT INTO url(url, alias) VALUES(?, ?)")
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", operation, err)
 	}
 	res, err := stmt.Exec(urlToSave, alias)
 	if err != nil {
-		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+		var sqliteErr sqlite3.Error
+		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
 			return 0, fmt.Errorf("%s: %w", operation, storage.ErrURLExists)
 		}
 		return 0, fmt.Errorf("%s: %w", operation, err)
@@ -79,6 +80,7 @@ func (s Storage) GetURL(alias string) (string, error) {
 
 	return fetchedURL, nil
 }
+
 func (s Storage) DeleteURL(alias string) error {
 	const operation = "storage.sqlite.DeleteURL"
 	stmt, err := s.db.Prepare("DELETE FROM url WHERE alias = ?")
